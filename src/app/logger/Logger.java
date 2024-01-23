@@ -1,82 +1,96 @@
 package app.logger;
 
-import app.*;
+import app.Main;
 
 public class Logger {
 	private static boolean thisEnabled = true;
 
+	static {
+	  info("Logger used");
+	}
 	public static boolean Switch(boolean enable) {
-		if (!enable) {
-			warning("Logger disabled");
-		}
-		if (enable) {
-			info("Logger enabled");
-		}
-		thisEnabled = enable;
-		return true;
+	  if (!enable) {
+		  warning("Logger disabled");
+	  }
+	  if (enable) {
+		  info("Logger enabled");
+	  }
+	  thisEnabled = enable;
+	  return true;
 	}
 
 	public static void info(String message) {
 		try {
 			message(LogLevel.INFO, message);
-		} catch (Exception|Error e) {
-			System.out.println("[ERROR] "+e.getMessage());
-			System.out.println("  "+e.getStackTrace());
+		} catch (Throwable e) {
+			System.out.println("[ERROR] " + e.getMessage());
+			System.out.println("  " + e.getStackTrace());
 			Main.Exit();
-		}
+		} 
 	}
 	public static void alert(String message) {
 		try {
 			message(LogLevel.ALERT, message);
-		} catch (Exception|Error e) {
-			System.out.println("[ERROR] "+e.getMessage());
-			System.out.println("  "+e.getStackTrace());
+		} catch (Throwable e) {
+			System.out.println("[ERROR] " + e.getMessage());
+			System.out.println("  " + e.getStackTrace());
 			Main.Exit();
-		}
+		} 
 	}
 	public static void warning(String message) {
 		try {
 			message(LogLevel.WARNING, message);
-		} catch (Exception|Error e) {
-			System.out.println("[ERROR] "+e.getMessage());
-			System.out.println("  "+e.getStackTrace());
+		} catch (Throwable e) {
+			System.out.println("[ERROR] " + e.getMessage());
+			System.out.println("  " + e.getStackTrace());
 			Main.Exit();
-		}
+		} 
 	}
 	public static void error(String message) {
 		try {
 			message(LogLevel.ERROR, message);
-		} catch (Exception|Error e) {
-			System.out.println("[ERROR] "+e.getMessage());
-			System.out.println("  "+e.getStackTrace());
-			Main.Exit();
-		}
+		} catch (Throwable e) {
+			System.out.println("[ERROR] " + e.getMessage());
+			System.out.println("  " + e.getStackTrace());
+		} 
 	}
 	public static void fatal(String message) {
 		try {
 			message(LogLevel.FATAL, message);
-		} catch (Exception|Error e) {
-			System.out.println("[ERROR] "+e.getMessage());
-			System.out.println("  "+e.getStackTrace());
+		} catch (Throwable e2) {
+			fatal(e2);
 			Main.Exit();
-		}
+		} 
 	}
-	private static void message(LogLevel lL, String message) throws Exception, Error {
+	public static void fatal(Throwable e1) {
+		try {
+			e1.printStackTrace();
+		} catch (Throwable e2) {
+			fatal(String.valueOf(e2.getMessage()) + e2.getStackTrace());
+			Main.Exit();
+		} 
+	}
+	private static void message(LogLevel lL, String message) throws Throwable {
 		String level = "";
-		if (lL == LogLevel.INFO) {
+		switch (lL) {
+		case INFO:
 			level = "[INFO]";
-		} else if (lL == LogLevel.ALERT) {
+			break;
+		case ALERT:
 			level = "[ALERT]";
-		} else if (lL == LogLevel.WARNING) {
+			break;
+		case WARNING:
 			level = "[WARNING]";
-		} else if (lL == LogLevel.ERROR) {
+			break;
+		case ERROR:
 			level = "[ERROR]";
-		} else if (lL == LogLevel.FATAL) {
+			break;
+		case FATAL:
 			throw new Error(message);
-		} else {
+		default:
 			level = "[UNKNOWN{ERROR_ON_SWITCH}]";
 			throw new Exception("Unknown LogLevel given!");
-		}
-		if (thisEnabled) System.out.println(level+" "+message);
+		} 
+		if (thisEnabled) System.out.println(String.valueOf(level) + " " + message); 
 	}
 }

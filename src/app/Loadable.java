@@ -1,17 +1,25 @@
 package app;
-
 public abstract class Loadable extends Thread {
 	private boolean runed = true;
 
-	abstract public void load(Main main);
-	abstract public void run();
-	abstract public void shutdown();
+	public abstract void load(Main paramMain);
+	public final void run() {
+		int circle = 0;
+		onrun();
+		while (this.runed) {
+			circle++;
+			update(circle);
+		} 
+	}
 
-	final public void disable() {
-		runed = false;
+	public abstract void onrun();
+
+	public final void disable() {
+		this.runed = false;
 		shutdown();
 	}
-	final public boolean isActive() {
-		return runed;
+	public abstract void update(int paramInt); public abstract void shutdown();
+	public final boolean isActive() {
+		return this.runed;
 	}
 }
