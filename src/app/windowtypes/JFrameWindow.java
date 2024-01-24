@@ -1,7 +1,6 @@
 package app.windowtypes;
 import app.Main;
 import app.logger.Logger;
-import app.utils.Alerts;
 import app.utils.Math;
 import java.awt.Color;
 import java.awt.Component;
@@ -38,28 +37,21 @@ public class JFrameWindow extends JFrame implements WindowType {
 			Logger.error("Icon error: " + e.getMessage());
 		} 
     
-		addWindowListener(new WindowListener() { public void windowActivated(WindowEvent event) {}
-		public void windowClosed(WindowEvent event) {}
+		addWindowListener(
+				new WindowListener() {
+					public void windowActivated(WindowEvent event) {}
+					public void windowClosed(WindowEvent event) {}
           
-		public void windowClosing(WindowEvent event) {
-			Logger.info("User click on close button");
-			if (Main.alertsEnable) {
-				Alerts.ExitMessage(event);
-			} else {
-				event.getWindow().setVisible(false);
-				Main.Exit();
-			} 
-		}
-		public void windowDeactivated(WindowEvent event) {}
-		public void windowDeiconified(WindowEvent event) {}
-		public void windowIconified(WindowEvent event) {}
-		public void windowOpened(WindowEvent event) {
-			if (Main.alertsEnable) {
-				Alerts.RunMessage();
-            }
-          }
-		}
-      );
+					public void windowClosing(WindowEvent event) {
+						event.getWindow().setVisible(false);
+						Main.Exit();
+					}
+					public void windowDeactivated(WindowEvent event) {}
+					public void windowDeiconified(WindowEvent event) {}
+					public void windowIconified(WindowEvent event) {}
+					public void windowOpened(WindowEvent event) {}
+				}
+		);
     
 		this.panel = new JPanel() {
         private static final long serialVersionUID = 1L;
@@ -85,9 +77,9 @@ public class JFrameWindow extends JFrame implements WindowType {
 		return dpxX;
 	}
 	private float getYAsDisplay(float px1) {
-	  int displayY = (Toolkit.getDefaultToolkit().getScreenSize()).height;
-	  float dpxY = displayY * px1 / 100.0F;
-	  return dpxY;
+		int displayY = (Toolkit.getDefaultToolkit().getScreenSize()).height;
+		float dpxY = displayY * px1 / 100.0F;
+		return dpxY;
 	}
 	protected static ImageIcon createIcon(String path) {
 		URL imgURL = JFrameWindow.class.getResource(path);
@@ -113,31 +105,32 @@ public class JFrameWindow extends JFrame implements WindowType {
 		add(this.panel);
 	}
   
-  public ProgressWindow addProgressBar() {
-/* 118 */     ProgressWindow win = new ProgressWindow();
-/* 119 */     win.run();
-/* 120 */     return win;
-  }
+	public ProgressWindow addProgressBar() {
+		ProgressWindow win = new ProgressWindow();
+		win.run();
+		return win;
+	}
   
-  public void setText(int strNum, String string) {
-/* 124 */     this.texts[strNum] = string;
-/* 125 */     remove(this.panel);
-/* 126 */     this.panel = new JPanel()
-      {
-        private static final long serialVersionUID = 1L;
+	public void setText(int strNum, String string) {
+	  this.texts[strNum] = string;
+	  remove(this.panel);
+	  this.panel = new JPanel() {
+		  private static final long serialVersionUID = 1L;
         
-        public void paintComponent(Graphics g) {
-/* 131 */           int yText = 10;
-/* 132 */           super.paintComponent(g);
-/* 133 */           g.setColor(Color.BLACK); byte b; int i; String[] arrayOfString;
-/* 134 */           for (i = (arrayOfString = JFrameWindow.this.texts).length, b = 0; b < i; ) { String text = arrayOfString[b];
-/* 135 */             if (text == null)
-/* 136 */               return;  g.drawString(text, 0, yText);
-/* 137 */             yText += 13;
-            b++; }
-           }
-      };
-/* 141 */     add(this.panel);
-/* 142 */     remove(this.panel);
-  }
+		  public void paintComponent(Graphics g) {
+			  int yText = 10;
+			  super.paintComponent(g);
+			  g.setColor(Color.BLACK); byte b; int i; String[] arrayOfString;
+			  for (i = (arrayOfString = JFrameWindow.this.texts).length, b = 0; b < i; ) {
+				  String text = arrayOfString[b];
+				  if (text == null) return;
+				  g.drawString(text, 0, yText);
+				  yText += 13;
+				  b++;
+			  }
+		  }
+	  };
+	  add(this.panel);
+	  remove(this.panel);
+	}
 }

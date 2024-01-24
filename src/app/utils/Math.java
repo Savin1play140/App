@@ -1,12 +1,7 @@
 package app.utils;
 
-import app.logger.Logger;
-
 public class Math {
 	private static final int maxBits = 8;
-	static {
-		Logger.info("Math class loaded as static");
-	}
 	public static double Fraction(int numerator, int denominator) {
 		return (numerator / denominator);
 	}

@@ -1,5 +1,6 @@
 package app;
 import app.logger.Logger;
+import app.utils.Localization;
 import app.windowtypes.JFrameWindow;
 import app.windowtypes.SWTWindow;
 import app.windowtypes.WindowType;
@@ -40,7 +41,7 @@ public class Window extends Thread {
 		return true;
 	}
    public void run() {
-     Logger.info("Create window");
+	   Logger.info(Localization.getText("window.init"));
      this.win.createGUI(this.name, this.texts, (float)this.x, (float)this.y, this.resizable);
    }
    public WindowType getWindow() {

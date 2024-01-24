@@ -7,22 +7,21 @@ import app.net.File;
 import app.sound.SoundManager;
 import app.update.Updater;
 import app.utils.Archive;
-import app.utils.Handler;
 import app.utils.Config;
+import app.utils.Localization;
 import app.windowtypes.PBType.ProgressBarType;
 
 public class Main {
 	public static boolean soundsEnable = true;
-	public static boolean windowEnable = true;
 	public static boolean isResizable = false;
-	public static boolean alertsEnable = true;
-	public static final double version = 0.6;
-	public static final String build = "0014";
+
+	public static final double version = 0.7;
+	public static final String build = "0006";
+	public static final boolean isTestBuild = false;
+
 	public static final String wt = "old";
 	private static ArrayList<Loadable> loadeds = new ArrayList<>();
-	private static ArrayList<Handler> handlers = new ArrayList<>();
 
-	private static Handler tpshandler;
 	private static Config cnf;
 
 	public static final String startSound = "./resources/sounds/test.wav";
@@ -33,10 +32,6 @@ public class Main {
 		loadeds.add(loading);
 		return loading;
 	}
-	public static boolean DisableLogging() {
-		Logger.alert("Disabling logger...");
-		return Logger.Switch(false);
-	}
 	public static Config getConfig() {
 		return cnf;
 	}
@@ -44,17 +39,19 @@ public class Main {
 		for (String arg : args) {
 			switch (arg) {
 				case "logger-disable":
-					DisableLogging();
+					Logger.shutdown();
 					break;
 				case "no-sounds":
 					soundsEnable = false;
 					break;
-				}
 			}
-		InitTPSHandler();
+		}
 		cnf = new Config();
 		cnf.defaultSetParam("serverHttp", serverHttp);
-		Logger.info("Server host: "+cnf.get("serverHttp"));
+		cnf.defaultSetParam("language", "ru_ru");
+		Localization.setLang(cnf.get("language"));
+		
+		Logger.info(Localization.getText("config.server"));
 	}
 
 	public static void main(String[] args) {
@@ -76,21 +73,17 @@ public class Main {
 	}
 	private void run(String[] args) {
 		Init(args);
-
-		if (windowEnable) {
-			SoundManager.PlaySound(startSound);
-			Window win = new Window();
-			loadExternal((Loadable)new Updater());
-			String[] texts = new String[25];
-			texts[0] = "Hello user.";
-			texts[1] = "This jar file has compiled in release mode.";
-			texts[2] = "This project for all.";
-			texts[3] = "Version format: v.v_b";
-			texts[4] = "   v - version";
-			texts[5] = "   b - build";
-			win.createGUI("old", "Window "+version+"_"+build+"[Release]", texts, 36.65, 65.2, false);
-		} 
-		StartTPSHandler();
+		SoundManager.PlaySound(startSound);
+		Window win = new Window();
+		loadExternal((Loadable)new Updater());
+		String[] texts = new String[25];
+		texts[0] = Localization.getText("text.0");
+		texts[1] = Localization.getText("text.1");
+		texts[2] = Localization.getText("text.2");
+		texts[3] = Localization.getText("text.3");
+		texts[4] = Localization.getText("text.4");
+		texts[5] = Localization.getText("text.5");
+		win.createGUI("old", "Window "+version+"_"+build+"[Release]", texts, 36.65, 65.2, false);
 	}
 	private static synchronized boolean resourcesCheck(boolean loadR) {
 		boolean exist = true;
@@ -111,31 +104,31 @@ public class Main {
 	public static synchronized void loadResources(boolean zipExist) {
 		if (zipExist) {
 			try {
-				Logger.info("Unziping resources.zip...");
+				Logger.info(Localization.getText("zip.unpack"));
 				Archive.unzip("resources.zip", "./");
 			} catch (IOException e) {
 				Logger.error(e.getMessage());
 			} 
 		} else {
 			try {
-				Logger.info("Download resources.zip...");
+				Logger.info(Localization.getText("zip.download"));
 				File.downloadFile(Main.getConfig().get("serverHttp")+"resources.zip", "resources.zip");
 				try {
-					Logger.info("Unziping resources.zip...");
+					Logger.info(Localization.getText("zip.unpack"));
 					Archive.unzip("resources.zip", "./");
 				} catch (IOException e) {
 					Logger.error(e.getMessage());
 				} 
 			} catch (IOException e) {
-				Logger.fatal("Directory and zip file not exist: " + e.getMessage());
+				Logger.fatal(Localization.getText("zip.error")+e.getMessage());
 				soundsEnable = false;
 			}
 		} 
 	}
 	public static synchronized boolean sync(boolean loging) {
-		if (loging) Logger.info("GC starting..."); 
+		if (loging) Logger.info(Localization.getText("gc.start")); 
 		gc();
-		if (loging) Logger.info("complited"); 
+		if (loging) Logger.info(Localization.getText("main.successful")); 
 		return true;
 	}
 	public static boolean gc() {
@@ -148,56 +141,14 @@ public class Main {
 		}
 		return true;
 	}
-	public static boolean stopTPS() {
-		tpshandler.exit();
-		return true;
-	}
-
-	private static void InitTPSHandler() {
-		tpshandler = new Handler() {
-			public boolean tpsEnabled;
-			private int tick = 0;
-
-			public void ontick() {
-				while (this.tpsEnabled) {
-					if (this.tick > 30) {
-						this.tick++;
-					} else {
-						this.tick = 0;
-					} 
-					for (Handler h : Main.handlers) h.onTPS(this.tick);
-					try {
-						Thread.sleep(50L);
-						} catch (InterruptedException e) {
-							Logger.fatal(e);
-						}
-				}
-			}
-			public void onrun() {
-				this.tpsEnabled = true;
-			}
-			public void onTPS(int tick) {} public void onstop() {
-				this.tpsEnabled = false;
-			}
-		};
-	}
-	private static void StartTPSHandler() {
-		tpshandler.start();
-	}
-	public static Handler AddHandler(Handler handler) {
-		handler.start();
-		handlers.add(handler);
-		return handler;
-	}
 
 	public static void Exit() {
 		SoundManager.PlaySound(startSound);
-		Logger.info("sync data...");
+		Logger.info(Localization.getText("main.sync"));
 		boolean complite = sync(true);
 		if (complite) {
-			stopTPS();
 			shutdownAllExternal();
-			Logger.info("exit...");
+			Logger.info(Localization.getText("main.exit"));
 			System.exit(-1);
 		} else {
 			Logger.error("synchronize not complited");

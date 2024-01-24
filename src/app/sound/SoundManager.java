@@ -11,6 +11,7 @@ import javax.sound.sampled.LineListener;
 
 import app.Main;
 import app.logger.Logger;
+import app.utils.Localization;
 
 public class SoundManager {
 	public class Sound implements AutoCloseable {
@@ -126,8 +127,8 @@ public class SoundManager {
 	}
 	public static void PlaySound(String path, boolean autojoin) {
 		if (!Main.soundsEnable) return;
-		Logger.info("waiting...");
-		Logger.info("play sound...");
+		Logger.info(Localization.getText("sound.wait"));
+		Logger.info(Localization.getText("sound.play"));
 
 		(new Main()).getClass();
 		Sound snd = null;
@@ -136,7 +137,7 @@ public class SoundManager {
 		if (autojoin) snd.join(); 
 		snd.stop();
 		snd = null;
-		Logger.info("sound played");
+		Logger.info(Localization.getText("sound.played"));
 	}
 
 	public static void PlaySound(String path) { PlaySound(path, true); }

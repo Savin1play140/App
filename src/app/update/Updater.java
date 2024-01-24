@@ -4,6 +4,8 @@ import app.Main;
 import app.logger.Logger;
 import app.net.File;
 import app.utils.Archive;
+import app.utils.Localization;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,23 +36,26 @@ public class Updater extends Loadable {
 	}
 
 	public void load(Main main) {
+		if (Main.isTestBuild) {
+			Logger.alert(Localization.getText("update.skip"));
+			return;
+		}
 		String url = Main.getConfig().get("serverHttp")+"/RM.php?get-last-version";
 		if (hasConnection()) {
 			this.lastVersion = sendGet(url);
 			start();
 		} else {
-			Logger.warning("You have not connnection or server is not connectable");
-			Logger.warning("Cannot check updates");
+			Logger.warn(Localization.getText("update.fail-conn"));
 		} 
 	}
 
 	public void onrun() { checkUpdate(true); }
 	private void update() {
-		Logger.info("Installing update...");
+		Logger.info(Localization.getText("update.install"));
 		try {
 			File.downloadFile(Main.getConfig().get("serverHttp")+"/RM.php?get-update", String.valueOf(lastVersion)+".zip");
 			Archive.unzip(String.valueOf(lastVersion)+".zip", "./"+lastVersion+"_"+lastBuild);
-			Logger.info("The update was successfully installed in \""+lastVersion+"_"+lastBuild+"\" dir");
+			Logger.info(Localization.getText("update.successful")+" \""+lastVersion+"_"+lastBuild+"\"");
 		} catch (IOException e) {
 			Logger.error(e.getMessage());
 		}
@@ -63,9 +68,9 @@ public class Updater extends Loadable {
 		if (buildServer > buildThis) {
 			update();
 		} else if (buildServer < buildThis) {
-			if (sendMessage) Logger.info("Updating to a server older than installed");
+			if (sendMessage) Logger.info(Localization.getText("update.update-new"));
 		} else if (buildServer == buildThis) {
-			if (sendMessage) Logger.info("Updates not found, is already instaled");
+			if (sendMessage) Logger.info(Localization.getText("update.no-update"));
 		}
 	}
 	public void checkUpdate(boolean sendMessage) {
@@ -77,19 +82,19 @@ public class Updater extends Loadable {
 		} catch (NumberFormatException e) {
 			System.err.println(e);
 		} 
-		if (sendMessage) Logger.info("Test connection, server: "+Main.getConfig().get("serverHttp"));
+		if (sendMessage) Logger.info(Localization.getText("update.test"));
 		if (hasConnection()) {
 			if (ver > Main.version) {
 				update();
 			} else if (ver < Main.version) {
-				if (sendMessage) Logger.info("The server version has not yet been updated");
+				if (sendMessage) Logger.info(Localization.getText("update.server-old"));
 			} else if (ver == Main.version) {
-				if (sendMessage) Logger.info("Latest version is already installed");
-				if (sendMessage) Logger.info("Getting updates...");
+				if (sendMessage) Logger.info(Localization.getText("update.last"));
+				if (sendMessage) Logger.info(Localization.getText("update.getting"));
 				checkBuild(sendMessage);
 			} 
 		} else {
-			if (sendMessage) Logger.warning("You have not connnection or server is not available");
+			if (sendMessage) Logger.warn(Localization.getText("update.fail-conn"));
 			return;
 		} 
 	}
