@@ -1,5 +1,5 @@
 # App
-Test progect "App" for java 8 and above
+Test project "App" for java 8 and above
 # Важно
 1. Теперь я не буду делать ин. описание
 2. Необходимо разархивировать файл "resources.zip"
