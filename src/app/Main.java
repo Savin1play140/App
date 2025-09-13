@@ -48,13 +48,14 @@ public class Main {
 		}
 		cnf = new Config();
 		cnf.defaultSetParam("serverHttp", serverHttp);
-		cnf.defaultSetParam("language", "ru_ru");
+		cnf.defaultSetParam("language", "en_us");
 		Localization.setLang(cnf.get("language"));
 		
 		Logger.info(Localization.getText("config.server"));
 	}
 
 	public static void main(String[] args) {
+		Init(args);
 		boolean exist = resourcesCheck(false);
 		ProgressBarType win = null;
 		if (!exist) win = Window.sendProgressBar("old"); 
@@ -72,7 +73,6 @@ public class Main {
 		main.run(args);
 	}
 	private void run(String[] args) {
-		Init(args);
 		SoundManager.PlaySound(startSound);
 		Window win = new Window();
 		loadExternal((Loadable)new Updater());
