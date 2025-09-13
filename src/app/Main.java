@@ -14,6 +14,7 @@ import app.windowtypes.PBType.ProgressBarType;
 public class Main {
 	public static boolean soundsEnable = true;
 	public static boolean isResizable = false;
+	public static boolean resourceEnable = true;
 
 	public static final double version = 0.7;
 	public static final String build = "0006";
@@ -58,22 +59,27 @@ public class Main {
 		Init(args);
 		boolean exist = resourcesCheck(false);
 		ProgressBarType win = null;
-		if (!exist) win = Window.sendProgressBar("old"); 
-		while (!exist) {
+		if (!exist) win = Window.sendProgressBar("old");
+		int try_num = 0;
+		while (!exist && try_num < 5) {
+			try_num++;
 			try {
 				Thread.sleep(750L);
 				exist = resourcesCheck(true);
 			} catch (InterruptedException e) {
 				Logger.fatal(e);
 			} 
-			File.deleteFile("resources.zip");
-			if (exist) win.shutdown(); 
-		} 
+			if (exist) {
+				File.deleteFile("resources.zip");
+				win.shutdown();
+			}
+		}
+		resourceEnable = exist;
 		Main main = new Main();
 		main.run(args);
 	}
 	private void run(String[] args) {
-		SoundManager.PlaySound(startSound);
+		if (resourceEnable) SoundManager.PlaySound(startSound);
 		Window win = new Window();
 		loadExternal((Loadable)new Updater());
 		String[] texts = new String[25];
