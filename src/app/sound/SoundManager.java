@@ -1,7 +1,9 @@
 package app.sound;
 
+import app.Main;
+import app.utils.Localization;
+import java.io.File;
 import java.io.IOException;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -9,137 +11,141 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 
-import app.Main;
-import app.logger.Logger;
-import app.utils.Localization;
-
 public class SoundManager {
-	public class Sound implements AutoCloseable {
-		private boolean released = false;
-		private AudioInputStream stream = null;
-		private Clip clip = null;
-		private FloatControl volumeControl = null;
-		private boolean playing = false;
-		
-		public Sound(java.io.File f) {
-			try {
-				stream = AudioSystem.getAudioInputStream(f);
-				clip = AudioSystem.getClip();
-				clip.open(stream);
-				clip.addLineListener(new Listener());
-				volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-				released = true;
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				released = false;
-				
-				close();
-			}
-		}
-
-		public boolean isReleased() {
-			return released;
-		}
-		
-		public boolean isPlaying() {
-			return playing;
-		}
-
-		public void play(boolean breakOld) {
-			if (released) {
-				if (breakOld) {
-					clip.stop();
-					clip.setFramePosition(0);
-					clip.start();
-					playing = true;
-				} else if (!isPlaying()) {
-					clip.setFramePosition(0);
-					clip.start();
-					playing = true;
-				}
-			}
-		}
-		
-		public void play() {
-			play(true);
-		}
-		
-		public void stop() {
-			if (playing) {
-				clip.stop();
-			}
-		}
-		
-		public void close() {
-			if (clip != null)
-				clip.close();
-			
-			if (stream != null)
-				try {
-					stream.close();
-				} catch (IOException exc) {
-					exc.printStackTrace();
-				}
-		}
-
-		public void setVolume(float x) {
-			if (x<0) x = 0;
-			if (x>1) x = 1;
-			float min = volumeControl.getMinimum();
-			float max = volumeControl.getMaximum();
-			volumeControl.setValue((max-min)*x+min);
-		}
-		
-		public float getVolume() {
-			float v = volumeControl.getValue();
-			float min = volumeControl.getMinimum();
-			float max = volumeControl.getMaximum();
-			return (v-min)/(max-min);
-		}
-
-		public void join() {
-			if (!released) return;
-			synchronized(clip) {
-				try {
-					while (playing)
-						clip.wait();
-				} catch (InterruptedException exc) {}
-			}
-		}
-		
-		public static Sound playSound(String path) {
-			java.io.File f = new java.io.File(path);
-			Sound snd = (new SoundManager()).new Sound(f);
-			snd.play();
-			return snd;
-		}
-
-		private class Listener implements LineListener {
-			public void update(LineEvent ev) {
-				if (ev.getType() == LineEvent.Type.STOP) {
-					playing = false;
-					synchronized(clip) {
-						clip.notify();
-					}
-				}
-			}
-		}
-	}
-	public static void PlaySound(String path, boolean autojoin) {
-		if (!Main.soundsEnable) return;
-		Logger.info(Localization.getText("sound.wait"));
-		Logger.info(Localization.getText("sound.play"));
-
-		(new Main()).getClass();
-		Sound snd = null;
-		snd = (new SoundManager()).new Sound(new java.io.File(path));
-		snd.play();
-		if (autojoin) snd.join(); 
-		snd.stop();
-		snd = null;
-		Logger.info(Localization.getText("sound.played"));
-	}
-
-	public static void PlaySound(String path) { PlaySound(path, true); }
-	private SoundManager() {}
+  public class Sound implements AutoCloseable {
+    private boolean released = false;
+    
+    private AudioInputStream stream = null;
+    
+    private Clip clip = null;
+    
+    private FloatControl volumeControl = null;
+    
+    private boolean playing = false;
+    
+    public Sound(File f) {
+      try {
+        this.stream = AudioSystem.getAudioInputStream(f);
+        this.clip = AudioSystem.getClip();
+        this.clip.open(this.stream);
+        this.clip.addLineListener(new Listener());
+        this.volumeControl = (FloatControl)this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+        this.released = true;
+      } catch (Exception exc) {
+        exc.printStackTrace();
+        this.released = false;
+        close();
+      } 
+    }
+    
+    public boolean isReleased() {
+      return this.released;
+    }
+    
+    public boolean isPlaying() {
+      return this.playing;
+    }
+    
+    public void play(boolean breakOld) {
+      if (this.released)
+        if (breakOld) {
+          this.clip.stop();
+          this.clip.setFramePosition(0);
+          this.clip.start();
+          this.playing = true;
+        } else if (!isPlaying()) {
+          this.clip.setFramePosition(0);
+          this.clip.start();
+          this.playing = true;
+        }  
+    }
+    
+    public void play() {
+      play(true);
+    }
+    
+    public void stop() {
+      if (this.playing)
+        this.clip.stop(); 
+    }
+    
+    public void close() {
+      if (this.clip != null)
+        this.clip.close(); 
+      if (this.stream != null)
+        try {
+          this.stream.close();
+        } catch (IOException exc) {
+          exc.printStackTrace();
+        }  
+    }
+    
+    public void setVolume(float x) {
+      if (x < 0.0F)
+        x = 0.0F; 
+      if (x > 1.0F)
+        x = 1.0F; 
+      float min = this.volumeControl.getMinimum();
+      float max = this.volumeControl.getMaximum();
+      this.volumeControl.setValue((max - min) * x + min);
+    }
+    
+    public float getVolume() {
+      float v = this.volumeControl.getValue();
+      float min = this.volumeControl.getMinimum();
+      float max = this.volumeControl.getMaximum();
+      return (v - min) / (max - min);
+    }
+    
+    public void join() {
+      if (!this.released)
+        return; 
+      synchronized (this.clip) {
+        try {
+          while (this.playing)
+            this.clip.wait(); 
+        } catch (InterruptedException interruptedException) {}
+      } 
+    }
+    
+    public static Sound playSound(String path) {
+      File f = new File(path);
+      (new SoundManager()).getClass();
+      Sound snd = new Sound(f);
+      snd.play();
+      return snd;
+    }
+    
+    private class Listener implements LineListener {
+      public void update(LineEvent ev) {
+        if (ev.getType() == LineEvent.Type.STOP) {
+          SoundManager.Sound.this.playing = false;
+          synchronized (SoundManager.Sound.this.clip) {
+            SoundManager.Sound.this.clip.notify();
+          } 
+        } 
+      }
+    }
+  }
+  
+  public static void PlaySound(String path, boolean autojoin) {
+    if (!Main.soundsEnable)
+      return; 
+    Localization.sendText("sound.wait", "info");
+    Localization.sendText("sound.play", "info");
+    (new Main()).getClass();
+    Sound snd = null;
+    (new SoundManager()).getClass();
+    snd = new Sound(new File(path));
+    snd.play();
+    if (autojoin)
+      snd.join(); 
+    snd.stop();
+    snd = null;
+    Localization.sendText("sound.played", "info");
+  }
+  
+  public static void PlaySound(String path) {
+    PlaySound(path, true);
+  }
 }
