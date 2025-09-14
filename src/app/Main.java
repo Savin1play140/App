@@ -68,11 +68,11 @@ public class Main {
 				exist = resourcesCheck(true);
 			} catch (InterruptedException e) {
 				Logger.fatal(e);
-			} 
-			if (exist) {
-				File.deleteFile("resources.zip");
-				win.shutdown();
 			}
+		} 
+		if (exist) {
+			File.deleteFile("resources.zip");
+			win.shutdown();
 		}
 		resourceEnable = exist;
 		Main main = new Main();
